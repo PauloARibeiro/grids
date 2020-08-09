@@ -1,77 +1,115 @@
-const buttons = document.querySelectorAll('[data-add]')
+const buttons = document.querySelectorAll('[data-add]');
 
 buttons.forEach((button) => {
-    button.addEventListener('click', (event) => {
-        const divideAmount = event.target.getAttribute('data-add')
+  button.addEventListener('click', (event) => {
+    const divideAmount = event.target.getAttribute('data-add');
 
-        canvas.addLayout(layouts[divideAmount])
-    })
-})
+    canvas.addLayout(layouts[divideAmount]);
+  });
+});
 
 const canvas = {
-    container: document.querySelector('.right-panel'),
-    deleteButton: document.querySelector('[data-delete]'),
-    selectedNode: '',
+  container: document.querySelector('.right-panel'),
+  deleteButton: document.querySelector('[data-delete]'),
+  selectedNode: '',
 
-    addLayout(template) {
-        if (!this.selectedNode) {
-            return this.container.append(template())
-        }
+  addLayout(template) {
+    if (!this.selectedNode) {
+      return this.container.append(template());
+    }
 
-        const templateElement = template()
-        const divideAmount = parseInt(templateElement.getAttribute('data-divide-amount'))
-        const dividerColumn = templateElement.getAttribute('data-divide')
-        const currentDivide = parseFloat(this.selectedNode.style.maxWidth.replace('%', ''))
+    // this.selectedNode.innerHTML = '';
+    // this.selectedNode.append(template());
 
-        const parent = this.selectedNode.parentElement
-        const parentDivideAmount = parseInt(parent.getAttribute('data-divide-amount'))
+    const templateElement = template();
+    const divideAmount = parseInt(
+      templateElement.getAttribute('data-divide-amount')
+    );
+    const dividerColumn = templateElement.getAttribute('data-divide');
+    const currentDivide = parseFloat(
+      this.selectedNode.style.maxWidth.replace('%', '')
+    );
 
-        this.selectedNode.textContent = ''
+    const parent = this.selectedNode.parentElement;
+    const parentDivideAmount = parseInt(
+      parent.getAttribute('data-divide-amount')
+    );
 
-        parent.setAttribute('data-divide-amount', parentDivideAmount + divideAmount)
+    this.selectedNode.textContent = '';
 
-        for (let index = 0; index < divideAmount; index++) {
-            const div = document.createElement('div')
+    parent.setAttribute(
+      'data-divide-amount',
+      parentDivideAmount + divideAmount
+    );
 
-            div.setAttribute(
-                'style',
-                `flex: 0 0 ${currentDivide / divideAmount}%; max-width: ${
-                    currentDivide / divideAmount
-                }%; background: #BC4E55; outline: 1px dashed white;`,
-            )
+    const bgColor = getRandomColor();
+    const id = uuidv4();
 
-            div.textContent = `col ${divideAmount}`
+    for (let index = 0; index < divideAmount; index++) {
+      const div = document.createElement('div');
 
-            this.selectedNode.append(div)
+      div.setAttribute(
+        'style',
+        `flex: 0 0 ${currentDivide / divideAmount}%; max-width: ${
+          currentDivide / divideAmount
+        }%; 
+        background: ${bgColor};
+        outline: 1px dashed white;`
+      );
 
-            if (index === divideAmount - 1) {
-                this.selectedNode.replaceWith(...this.selectedNode.childNodes)
-            }
-        }
+      div.setAttribute('data-id', id);
 
-        this.selectedNode = null
-    },
+      div.textContent = `col ${divideAmount}`;
 
-    deleteNode() {
-        const parent = this.selectedNode.parentElement
-        const parentDivideAmount = parseInt(parent.getAttribute('data-divide-amount'))
-    },
+      this.selectedNode.append(div);
 
-    selectNode(node) {
-        this.selectedNode = node
+      if (index === divideAmount - 1) {
+        this.selectedNode.replaceWith(...this.selectedNode.childNodes);
+      }
+    }
 
-        const leftOffset = this.selectedNode.offsetLeft
-        const selectedNodeWidth = this.selectedNode.getBoundingClientRect().width
-        const buttonWidth = this.deleteButton.getBoundingClientRect().width
+    this.selectedNode = null;
+  },
 
-        this.deleteButton.parentElement.style.left =
-            leftOffset + selectedNodeWidth - buttonWidth + 'px'
-    },
+  deleteNode() {
+    const id = this.selectedNode.getAttribute('data-id');
+    console.log(id);
+  },
 
-    init() {
-        this.container.addEventListener('click', (event) => this.selectNode(event.target))
-        this.deleteButton.addEventListener('click', () => this.deleteNode())
-    },
+  selectNode(node) {
+    this.selectedNode = node;
+
+    const leftOffset = this.selectedNode.offsetLeft;
+    const selectedNodeWidth = this.selectedNode.getBoundingClientRect().width;
+    const buttonWidth = this.deleteButton.getBoundingClientRect().width;
+
+    this.deleteButton.parentElement.style.left =
+      leftOffset + selectedNodeWidth - buttonWidth + 'px';
+  },
+
+  init() {
+    this.container.addEventListener('click', (event) =>
+      this.selectNode(event.target)
+    );
+    this.deleteButton.addEventListener('click', () => this.deleteNode());
+  },
+};
+
+canvas.init();
+
+function getRandomColor() {
+  var letters = '0123456789ABCDEF';
+  var color = '#';
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
 }
 
-canvas.init()
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    var r = (Math.random() * 16) | 0,
+      v = c == 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
